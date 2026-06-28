@@ -23,7 +23,9 @@ _Part of [JavaScript](README.md) interview notes._
 **🔴 Hard**
 - [11. How would you implement the Singleton pattern in JavaScript?](#11-how-would-you-implement-the-singleton-pattern-in-javascript)
 - [12. How would you implement the Factory pattern in JavaScript?](#12-how-would-you-implement-the-factory-pattern-in-javascript)
-- [13. How does ES6 `class` syntax differ from an ES5 constructor function under the hood?](#13-how-does-es6-class-syntax-differ-from-an-es5-constructor-function-under-the-hood)
+- [13. How would you implement the Observer pattern in JavaScript?](#13-how-would-you-implement-the-observer-pattern-in-javascript)
+- [14. How would you implement the Strategy pattern in JavaScript?](#14-how-would-you-implement-the-strategy-pattern-in-javascript)
+- [15. How does ES6 `class` syntax differ from an ES5 constructor function under the hood?](#15-how-does-es6-class-syntax-differ-from-an-es5-constructor-function-under-the-hood)
 
 ---
 
@@ -252,7 +254,55 @@ circle.area(2);
 
 ---
 
-### 13. How does ES6 `class` syntax differ from an ES5 constructor function under the hood? 🔴
+### 13. How would you implement the Observer pattern in JavaScript? 🔴
+
+- A "subject" maintains a list of subscriber functions and notifies all of them whenever something happens — decouples the thing that changes from the things that react to it.
+
+```js
+class Subject {
+  #observers = [];
+  subscribe(fn) { this.#observers.push(fn); }
+  unsubscribe(fn) { this.#observers = this.#observers.filter((o) => o !== fn); }
+  notify(data) { this.#observers.forEach((fn) => fn(data)); }
+}
+
+const stockPrice = new Subject();
+stockPrice.subscribe((price) => console.log(`Investor A sees: ${price}`));
+stockPrice.notify(150); // "Investor A sees: 150"
+```
+
+> [!TIP]
+> **Real-life example:** this is the same idea behind the [pub-sub event system](dom-and-events.md#14-how-would-you-implement-a-custom-pub-sub-event-system-without-using-the-dom) built earlier, Node's `EventEmitter`, and RxJS Observables — all are variations on the Observer pattern.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 14. How would you implement the Strategy pattern in JavaScript? 🔴
+
+- Define a family of interchangeable behaviors/algorithms, and select one at runtime instead of hardcoding a long `if`/`switch` chain.
+
+```js
+const paymentStrategies = {
+  creditCard: (amount) => console.log(`Paying ${amount} via Credit Card`),
+  paypal: (amount) => console.log(`Paying ${amount} via PayPal`),
+  crypto: (amount) => console.log(`Paying ${amount} via Crypto`),
+};
+
+function checkout(method, amount) {
+  paymentStrategies[method](amount);
+}
+checkout('paypal', 50); // "Paying 50 via PayPal"
+```
+
+> [!TIP]
+> **Real-life example:** a checkout flow that swaps payment-processing logic based on the method the user picks, without an ever-growing `if`/`else` chain.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 15. How does ES6 `class` syntax differ from an ES5 constructor function under the hood? 🔴
 
 - Class methods are **non-enumerable** by default (won't show up in `for...in`/`Object.keys()`); manually-assigned prototype methods on a constructor function are enumerable by default.
 - A class **must** be called with `new` — calling it as a plain function throws a `TypeError`. A constructor function can be called without `new` (though it'll misbehave, since `this` won't be the new instance).

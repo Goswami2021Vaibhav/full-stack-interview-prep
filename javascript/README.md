@@ -23,4 +23,5 @@ Interview Q&A notes for **JavaScript**, organized by category.
 - [ES6+ Features](es6-plus-features.md)
 - [Error Handling](error-handling.md)
 - [DOM & Events](dom-and-events.md)
+- [Browser APIs & Storage](browser-apis-and-storage.md)
 - [Performance & Memory](performance-and-memory.md)
