@@ -5,38 +5,136 @@ _Part of [Operating System](README.md) interview notes._
 ## Table of Contents
 
 **🟢 Easy**
-- _Coming soon_
+- [1. What is memory management?](#1-what-is-memory-management)
+- [2. What is virtual memory?](#2-what-is-virtual-memory)
+- [3. What is paging?](#3-what-is-paging)
 
 **🟡 Medium**
-- _Coming soon_
+- [4. What is segmentation, and how does it differ from paging?](#4-what-is-segmentation-and-how-does-it-differ-from-paging)
+- [5. What is a page fault?](#5-what-is-a-page-fault)
+- [6. What is thrashing?](#6-what-is-thrashing)
+- [7. What's the difference between internal and external fragmentation?](#7-whats-the-difference-between-internal-and-external-fragmentation)
+- [8. What's the difference between logical (virtual) and physical address space?](#8-whats-the-difference-between-logical-virtual-and-physical-address-space)
 
 **🔴 Hard**
-- _Coming soon_
+- [9. What are common page replacement algorithms?](#9-what-are-common-page-replacement-algorithms)
+- [10. What is a TLB (Translation Lookaside Buffer), and why does it matter for performance?](#10-what-is-a-tlb-translation-lookaside-buffer-and-why-does-it-matter-for-performance)
+- [11. What is demand paging?](#11-what-is-demand-paging)
+- [12. How does the OS decide what to swap out to disk?](#12-how-does-the-os-decide-what-to-swap-out-to-disk)
+- [13. What's the difference between the stack and the heap in a process's memory layout?](#13-whats-the-difference-between-the-stack-and-the-heap-in-a-processs-memory-layout)
 
 ---
 
-<!--
-Add questions below in this format. Number sequentially across the whole
-file (Easy -> Medium -> Hard, in display order) and keep the TOC link's
-number in sync with the heading number:
+### 1. What is memory management? 🟢
 
-### 1. Question text here? 🟢
-
-- Concise bullet-point answer (2-4 lines).
-- Another point if needed.
-
-```js
-// optional code example, only if it clarifies the answer
-```
-
-> [!TIP]
-> **Real-life example:** optional — only include if there's a genuinely concrete one.
-
-> [!IMPORTANT]
-> **Follow-up questions:**
-> - Optional follow-up question (question only, no answer).
+- The OS subsystem responsible for allocating, tracking, and reclaiming memory across all running processes — ensuring each process gets the memory it needs while keeping processes isolated from each other's memory.
 
 [↑ Back to top](#table-of-contents)
 
 ---
--->
+
+### 2. What is virtual memory? 🟢
+
+- An abstraction giving each process the illusion of its **own**, large, contiguous address space — independent of how much physical RAM actually exists, and isolated from other processes' memory. The OS (with hardware support) maps these virtual addresses to actual physical memory locations behind the scenes.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 3. What is paging? 🟢
+
+- Divides both virtual and physical memory into fixed-size blocks (**pages** and **frames**) — a process's virtual pages are mapped to physical frames via a **page table**, letting a process's memory be scattered non-contiguously in physical RAM while still appearing contiguous to the process itself.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 4. What is segmentation, and how does it differ from paging? 🟡
+
+- **Segmentation**: divides memory into **variable-sized** logical segments (code, data, stack), each meaningful to the program's structure.
+- **Paging**: divides memory into **fixed-size** blocks with no inherent logical meaning. Paging avoids segmentation's tendency toward external fragmentation (Q7) (since every block is the same size), which is why most modern systems use paging, sometimes combined with segmentation for logical organization.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 5. What is a page fault? 🟡
+
+- Occurs when a process accesses a virtual page that **isn't currently** mapped to physical memory (e.g. it's been swapped out to disk, or never loaded yet) — the OS pauses the process, loads the needed page from disk into RAM, updates the page table, and resumes execution. A small number of page faults is normal; excessive faulting indicates a problem (Q6).
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 6. What is thrashing? 🟡
+
+- When a system spends **more time** swapping pages in and out of memory than actually executing useful work — typically caused by too many processes competing for too little physical RAM, each repeatedly evicting pages the others need. Severely degrades overall system performance; the fix is usually reducing memory pressure (fewer concurrent processes, or more RAM).
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 7. What's the difference between internal and external fragmentation? 🟡
+
+- **Internal fragmentation**: wasted space **within** an allocated block — a process is given a fixed-size page/block larger than it actually needs, and the unused remainder inside that block is wasted.
+- **External fragmentation**: wasted space **between** allocated blocks — free memory exists in total, but scattered in small, non-contiguous chunks too small individually to satisfy a new request, even though their sum would be enough.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 8. What's the difference between logical (virtual) and physical address space? 🟡
+
+- **Logical/virtual address**: the address a process **uses** internally — generated by the CPU during execution, relative to that process's own isolated view of memory.
+- **Physical address**: the actual address in **real RAM hardware** — the Memory Management Unit (MMU) translates every logical address a process generates into the corresponding physical address, transparently to the process.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 9. What are common page replacement algorithms? 🔴
+
+- **FIFO**: evicts the oldest-loaded page — simple, but can perform poorly (can even get worse with more memory, "Belady's anomaly").
+- **LRU** (Least Recently Used): evicts the page not accessed for the longest time — generally good performance, but requires tracking access history (some overhead).
+- **Optimal**: evicts whichever page won't be needed for the longest time in the future — theoretically ideal, but requires knowing the future, so it's only used as a theoretical benchmark to compare other algorithms against.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 10. What is a TLB (Translation Lookaside Buffer), and why does it matter for performance? 🔴
+
+- A small, very fast **cache** (in the CPU itself) of recent virtual-to-physical address translations — without it, every single memory access would require a full page table lookup (itself potentially requiring a memory access), doubling the cost of every memory operation. A **TLB hit** lets the CPU skip the page table lookup entirely; a **TLB miss** falls back to the slower full lookup. High TLB hit rates are critical to overall system performance.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 11. What is demand paging? 🔴
+
+- Loads a page into physical memory **only when it's actually accessed** (triggering a page fault, Q5), rather than loading a process's entire memory image upfront — reduces initial load time and memory usage, since many pages (rarely-executed error-handling code, for instance) might never actually be needed during a given run.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 12. How does the OS decide what to swap out to disk? 🔴
+
+- Uses a page replacement algorithm (Q9) — typically approximating LRU (true LRU tracking is expensive, so real systems often use cheaper approximations like a "clock"/second-chance algorithm) — prioritizing keeping **recently and frequently accessed** pages in fast RAM, while evicting pages that seem least likely to be needed again soon to make room.
+
+[↑ Back to top](#table-of-contents)
+
+---
+
+### 13. What's the difference between the stack and the heap in a process's memory layout? 🔴
+
+- **Stack**: stores local variables and function call frames — grows/shrinks automatically as functions are called/return, fixed-size allocation per frame known at compile time, very fast (just moving a pointer), and limited in total size (a "stack overflow" occurs if it grows past its limit, e.g. from uncontrolled recursion).
+- **Heap**: stores dynamically allocated memory whose size/lifetime isn't known at compile time — manually (or garbage-collector) managed, more flexible, but slower to allocate from and prone to fragmentation over time.
+
+> [!IMPORTANT]
+> **Follow-up questions:**
+> - Why does deep, unbounded recursion typically cause a stack overflow specifically, rather than a heap-related error?
+
+[↑ Back to top](#table-of-contents)
+
+---
